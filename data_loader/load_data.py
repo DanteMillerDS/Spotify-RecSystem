@@ -1,7 +1,11 @@
 import numpy as np
+import pandas as pd
+from tqdm import tqdm
 import os
 import json
 import torch
+import gc
+from sklearn.model_selection import train_test_split
 np.random.seed(100)
 
 class DataPreprocessor:
@@ -27,26 +31,40 @@ class Extract_Information:
     """
     def __init__(self):
         self.playlists = {}
-    def extract_tracks(self, data):
+    def extract_unique_artists(self, data):
         """
-        Extracts track information from JSON data.
+        Extracts unique artist information from JSON data.
         :param data: Parsed JSON data.
-        :return: Dictionary of playlist names and their corresponding track information.
+        :return: Set of unique artists.
         """
         playlists = data.get("playlists", [])
-        for playlist in playlists:
-            playlist_name = playlist.get("name")
+        unique_artists = set()
+        for playlist in tqdm(playlists, desc="Extracting playlists"):
             tracks = playlist.get("tracks", [])
-            track_info = [
-                {
-                    "artist_name": track.get("artist_name"),
-                    "track_name": track.get("track_name"),
-                    "album_name": track.get("album_name")
-                }
-                for track in tracks
-            ]
-            self.playlists[playlist_name] = track_info
-        return self.playlists
+            for track in tracks:
+                unique_artists.add(track.get("artist_name"))
+        self.all_artists = unique_artists
+        return self.all_artists
+    # def extract_tracks(self, data):
+    #     """
+    #     Extracts track information from JSON data.
+    #     :param data: Parsed JSON data.
+    #     :return: Dictionary of playlist names and their corresponding track information.
+    #     """
+    #     playlists = data.get("playlists", [])
+    #     for playlist in tqdm(playlists, desc="Extracting playlist"):
+    #         playlist_name = playlist.get("name")
+    #         tracks = playlist.get("tracks", [])
+    #         track_info = [
+    #             {
+    #                 "artist_name": track.get("artist_name"),
+    #                 "track_name": track.get("track_name"),
+    #                 "album_name": track.get("album_name")
+    #             }
+    #             for track in tracks
+    #         ]
+    #         self.playlists[playlist_name] = track_info
+    #     return self.playlists
 
 def process_folder(folder_path, preprocessor, extractor):
     """
@@ -58,21 +76,21 @@ def process_folder(folder_path, preprocessor, extractor):
     """
     files = os.listdir(folder_path)
     all_playlists = {}
-    for file_name in files:
+
+    for file_name in tqdm(files, desc="Processing files"):
         file_path = os.path.join(folder_path, file_name)
         if os.path.isfile(file_path) and file_name.endswith(".json"):
             data = preprocessor(file_path)
-            all_playlists[file_path] = extractor.extract_tracks(data)
+            all_playlists[file_path] = extractor.extract_unique_artists(data)
     return all_playlists
 
-def create_loader(path_type, batch_size):
+def create_loader(path_type):
     """
     Creates a PyTorch DataLoader for loading and preprocessing JSON files.
     :param path_type: Type of JSON files.
-    :param batch_size: Batch size for the DataLoader.
     :return: PyTorch DataLoader.
     """
     preprocessor = DataPreprocessor()
     extractor = Extract_Information()
-    train_samples = process_folder(f'{path_type}/data',preprocessor, extractor)
-    return train_samples
+    samples = process_folder(f'{path_type}/data',preprocessor, extractor)
+    return samples

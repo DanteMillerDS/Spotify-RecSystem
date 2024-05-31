@@ -7,7 +7,7 @@ def mount_google_drive():
     Mounts Google Drive to the Colab environment if it is not already mounted.
     :return: None.
     """
-    
+
     print("Mounting Google Drive...")
     drive.mount('/content/drive')
 
@@ -27,12 +27,17 @@ def extract_zip_files():
     """
     print("Extracting zip files...")
     get_ipython().system('7z x /content/spotify_million_playlist_dataset.zip -o/content/')
+    if os.path.exists('spotify_million_playlist'):
+      pass
+    else:
+      os.mkdir('spotify_million_playlist')
+    %mv data spotify_million_playlist/data
     print("Files extracted successfully.")
 
 def mount_and_process():
     """
     Coordinates the mounting of Google Drive, copying of files from Google Drive to the local workspace,
-    and extracting those files for processing. 
+    and extracting those files for processing.
     :return: None.
     """
     if not os.path.ismount('/content/drive'):
