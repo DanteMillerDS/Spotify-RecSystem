@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+from tqdm import tqdm
 
 class MusicRecommender:
     "A class to recommend artists to users based on their listening history."
