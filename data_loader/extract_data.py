@@ -31,7 +31,7 @@ def extract_zip_files():
       pass
     else:
       os.mkdir('spotify_million_playlist')
-    %mv data spotify_million_playlist/data
+    shutil.move('/content/data', '/content/spotify_million_playlist/data')
     print("Files extracted successfully.")
 
 def mount_and_process():
