@@ -141,7 +141,7 @@ class MusicRecommender:
                     print(f"Artist {artist} not found in the database. Please try again.")
                     continue
                 new_user_artists.add(artist)
-        
+        print(f"Artists added for {new_user}: {new_user_artists}")
         self.user_artists[new_user] = new_user_artists
         self.find_all_unique_artists()
         self.create_user_artist_matrix()
